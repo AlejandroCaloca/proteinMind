@@ -56,7 +56,7 @@ class LibrarianAgent:
     MUTATION_CONFIDENCE = 0.8
 
     _MUTATION_PATTERN = re.compile(r"\b([A-Z]\d+[A-Z])\b")
-    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d+|[A-Z]\d+(?![A-Z]))\b")
+    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d+|[A-Z]\s?\d+(?![A-Z]))\b")
     _GEOMETRY_PATTERN = re.compile(r"\b\d+(?:\.\d+)?\s?(?:Å|A)\b")
 
     _CATEGORY_KEYWORDS: Dict[ConstraintCategory, Iterable[str]] = {
@@ -163,7 +163,7 @@ class LibrarianAgent:
         for paper in papers:
             for sentence in self._sentences(self._combine_title_and_abstract(paper.title, paper.abstract)):
                 lower = sentence.lower()
-                residues = self._RESIDUE_PATTERN.findall(sentence)
+                residues = [residue.replace(" ", "") for residue in self._RESIDUE_PATTERN.findall(sentence)]
                 mutations = self._MUTATION_PATTERN.findall(sentence)
 
                 for category, keywords in self._CATEGORY_KEYWORDS.items():

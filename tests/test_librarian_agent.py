@@ -14,6 +14,15 @@ class FakeProvider:
 
 
 class LibrarianAgentTests(unittest.TestCase):
+    @staticmethod
+    def _collect_residues(result) -> list[str]:
+        return [
+            residue
+            for category_items in result.constraints.values()
+            for item in category_items
+            for residue in item["residues"]
+        ]
+
     def test_build_constraint_object_extracts_expected_categories(self):
         papers = [
             Paper(
@@ -40,12 +49,7 @@ class LibrarianAgentTests(unittest.TestCase):
         self.assertTrue(result.constraints["beneficial_mutations"])
         self.assertTrue(result.constraints["codon_context"])
         self.assertTrue(result.constraints["validation"])
-        all_residues = [
-            residue
-            for category_items in result.constraints.values()
-            for item in category_items
-            for residue in item["residues"]
-        ]
+        all_residues = self._collect_residues(result)
         self.assertNotIn("H57A", all_residues)
         deleterious_mutations = [
             mutation
