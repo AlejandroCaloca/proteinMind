@@ -51,8 +51,12 @@ class LiteratureProvider(Protocol):
 
 
 class LibrarianAgent:
-    _MUTATION_PATTERN = re.compile(r"\b([A-Z]\d{1,4}[A-Z])\b")
-    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d{1,4}|[A-Z]\d{1,4})\b")
+    DEFAULT_CONFIDENCE = 0.7
+    GEOMETRY_WITH_MEASUREMENT_CONFIDENCE = 0.85
+    MUTATION_CONFIDENCE = 0.8
+
+    _MUTATION_PATTERN = re.compile(r"\b([A-Z]\d+[A-Z])\b")
+    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d+|[A-Z]\d+)\b")
     _GEOMETRY_PATTERN = re.compile(r"\b\d+(?:\.\d+)?\s?(?:Å|A)\b")
 
     _CATEGORY_KEYWORDS: Dict[ConstraintCategory, Iterable[str]] = {
@@ -164,9 +168,9 @@ class LibrarianAgent:
 
                 for category, keywords in self._CATEGORY_KEYWORDS.items():
                     if any(keyword in lower for keyword in keywords):
-                        confidence = 0.7
+                        confidence = self.DEFAULT_CONFIDENCE
                         if category == ConstraintCategory.GEOMETRY and self._GEOMETRY_PATTERN.search(sentence):
-                            confidence = 0.85
+                            confidence = self.GEOMETRY_WITH_MEASUREMENT_CONFIDENCE
                         items.append(
                             ConstraintItem(
                                 category=category,
@@ -185,7 +189,7 @@ class LibrarianAgent:
                                 category=ConstraintCategory.BENEFICIAL_MUTATIONS,
                                 statement=sentence,
                                 paper_id=paper.id,
-                                confidence=0.8,
+                                confidence=self.MUTATION_CONFIDENCE,
                                 residues=residues,
                                 mutations=mutations,
                             )
@@ -196,7 +200,7 @@ class LibrarianAgent:
                                 category=ConstraintCategory.DELETERIOUS_MUTATIONS,
                                 statement=sentence,
                                 paper_id=paper.id,
-                                confidence=0.8,
+                                confidence=self.MUTATION_CONFIDENCE,
                                 residues=residues,
                                 mutations=mutations,
                             )
