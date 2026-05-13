@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, Iterable, List, Protocol
 import re
+import string
 
 
 class ConstraintCategory(str, Enum):
@@ -56,7 +57,7 @@ class LibrarianAgent:
     MUTATION_CONFIDENCE = 0.8
 
     _MUTATION_PATTERN = re.compile(r"\b([A-Z]\d+[A-Z])\b")
-    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d+|[A-Z]\s?\d+(?![A-Z]))\b")
+    _RESIDUE_PATTERN = re.compile(r"\b((?:[A-Z][a-z]{0,2}|[A-Z]{1,3})\s?\d+)(?![A-Z])\b")
     _GEOMETRY_PATTERN = re.compile(r"\b\d+(?:\.\d+)?\s?(?:Å|A)\b")
 
     _CATEGORY_KEYWORDS: Dict[ConstraintCategory, Iterable[str]] = {
@@ -215,7 +216,7 @@ class LibrarianAgent:
             return abstract_clean
         if not abstract_clean:
             return title_clean
-        if title_clean.endswith((".", "!", "?")):
+        if title_clean.endswith(tuple(string.punctuation)):
             return f"{title_clean} {abstract_clean}"
         return f"{title_clean}. {abstract_clean}"
 
