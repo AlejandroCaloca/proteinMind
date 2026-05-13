@@ -56,7 +56,7 @@ class LibrarianAgent:
     MUTATION_CONFIDENCE = 0.8
 
     _MUTATION_PATTERN = re.compile(r"\b([A-Z]\d+[A-Z])\b")
-    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d+|[A-Z]\d+)\b")
+    _RESIDUE_PATTERN = re.compile(r"\b([A-Z][a-z]{2}\s?\d+|[A-Z]\d+(?![A-Z]))\b")
     _GEOMETRY_PATTERN = re.compile(r"\b\d+(?:\.\d+)?\s?(?:Å|A)\b")
 
     _CATEGORY_KEYWORDS: Dict[ConstraintCategory, Iterable[str]] = {
@@ -161,7 +161,7 @@ class LibrarianAgent:
     def _extract_constraints(self, papers: List[Paper]) -> List[ConstraintItem]:
         items: List[ConstraintItem] = []
         for paper in papers:
-            for sentence in self._sentences(f"{paper.title}. {paper.abstract}"):
+            for sentence in self._sentences(self._combine_title_and_abstract(paper.title, paper.abstract)):
                 lower = sentence.lower()
                 residues = self._RESIDUE_PATTERN.findall(sentence)
                 mutations = self._MUTATION_PATTERN.findall(sentence)
@@ -206,6 +206,18 @@ class LibrarianAgent:
                             )
                         )
         return items
+
+    @staticmethod
+    def _combine_title_and_abstract(title: str, abstract: str) -> str:
+        title_clean = title.strip()
+        abstract_clean = abstract.strip()
+        if not title_clean:
+            return abstract_clean
+        if not abstract_clean:
+            return title_clean
+        if title_clean.endswith((".", "!", "?")):
+            return f"{title_clean} {abstract_clean}"
+        return f"{title_clean}. {abstract_clean}"
 
     @staticmethod
     def _serialize_item(item: ConstraintItem) -> Dict[str, object]:

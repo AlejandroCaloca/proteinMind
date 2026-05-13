@@ -1,14 +1,15 @@
 import unittest
 import json
+from typing import List
 
 from proteinmind.librarian import LibrarianAgent, Paper
 
 
 class FakeProvider:
-    def __init__(self, papers):
+    def __init__(self, papers: List[Paper]):
         self._papers = papers
 
-    def search(self, query: str, max_results: int):
+    def search(self, query: str, max_results: int) -> List[Paper]:
         return self._papers[:max_results]
 
 
@@ -39,6 +40,13 @@ class LibrarianAgentTests(unittest.TestCase):
         self.assertTrue(result.constraints["beneficial_mutations"])
         self.assertTrue(result.constraints["codon_context"])
         self.assertTrue(result.constraints["validation"])
+        all_residues = [
+            residue
+            for category_items in result.constraints.values()
+            for item in category_items
+            for residue in item["residues"]
+        ]
+        self.assertNotIn("H57A", all_residues)
 
     def test_conflict_detection_flags_opposite_mutation_labels(self):
         papers = [

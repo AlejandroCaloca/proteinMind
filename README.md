@@ -47,7 +47,7 @@ All agent-to-agent messages should use a shared envelope:
 - **Extraction model serving**: NVIDIA NIM endpoints or local NeMo-hosted LLM for paper-to-constraint extraction.
 - **Vector retrieval**: NVIDIA NeMo Retriever (or FAISS-backed index on GPU where available) for paper chunk lookup.
 - **Knowledge graph persistence**: graph DB layer (e.g., Neo4j) with evidence edge metadata, orchestrated by Memory agent.
-- **Designer compute path**: ColabFold/RFdiffusion input generation + optional GPU execution on DGX Spark.
+- **Designer compute path**: ColabFold/RFdiffusion input generation + optional GPU execution on DGX-class infrastructure (including the DGX Spark environment referenced in the hackathon proposal).
 
 ## 3) Realistic 24-hour build scope
 
