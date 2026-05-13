@@ -47,6 +47,12 @@ class LibrarianAgentTests(unittest.TestCase):
             for residue in item["residues"]
         ]
         self.assertNotIn("H57A", all_residues)
+        deleterious_mutations = [
+            mutation
+            for item in result.constraints["deleterious_mutations"]
+            for mutation in item["mutations"]
+        ]
+        self.assertIn("H57A", deleterious_mutations)
 
     def test_conflict_detection_flags_opposite_mutation_labels(self):
         papers = [
@@ -98,6 +104,26 @@ class LibrarianAgentTests(unittest.TestCase):
 
         serialized = json.dumps(result.constraints)
         self.assertIn("active_site_contacts", serialized)
+
+    def test_residue_parsing_handles_punctuation(self):
+        papers = [
+            Paper(
+                id="PMID:6",
+                title="Active site residues",
+                abstract="The active site residues include H57, D102, and C176.",
+                source="pubmed",
+            )
+        ]
+        agent = LibrarianAgent(providers=[FakeProvider(papers)])
+
+        result = agent.build_constraint_object("residue punctuation")
+        active_site_entries = result.constraints["active_site_contacts"]
+        residues = {
+            residue
+            for item in active_site_entries
+            for residue in item["residues"]
+        }
+        self.assertTrue({"H57", "D102", "C176"}.issubset(residues))
 
 
 if __name__ == "__main__":
