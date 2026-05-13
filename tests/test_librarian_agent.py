@@ -57,6 +57,12 @@ class LibrarianAgentTests(unittest.TestCase):
             for mutation in item["mutations"]
         ]
         self.assertIn("H57A", deleterious_mutations)
+        active_site_residues = {
+            residue
+            for item in result.constraints["active_site_contacts"]
+            for residue in item["residues"]
+        }
+        self.assertTrue({"H57", "D102", "C176"}.issubset(active_site_residues))
 
     def test_conflict_detection_flags_opposite_mutation_labels(self):
         papers = [
